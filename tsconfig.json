@@ -1,11 +1,17 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "composite": false,
-    "noEmit": true
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "rootDir": "./src"
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["src/**/__tests__/**"]
+  "exclude": ["src/**/__tests__/**", "node_modules", "dist"]
 }
