@@ -1,13 +1,5 @@
 import type { Card, ElementType, CardCategory } from '../types/card'
 import { allCsvCards } from './cards/generated'
-// Legacy imports kept for reference / fallback
-import { allNewFireCards } from './cards/fire'
-import { blueElementalCards, blueElementalSpells, blueElementalFieldCards } from './cards/water'
-import { redElementalCards } from './cards/red'
-import { allNeutralCards } from './cards/neutral'
-import { allNonElementalCards } from './cards/nonElemental'
-import { advancedSpellCards } from './cards/advanced'
-import { conditionalDamageCards } from './cards/conditional'
 
 function flatArray(val: unknown): Card[] {
   if (!val) return []
@@ -15,24 +7,12 @@ function flatArray(val: unknown): Card[] {
   return [val as Card]
 }
 
-// Primary source: CSV-generated cards (source of truth)
-// Falls back to legacy hand-written cards for any IDs not in CSV
-const CSV_CARDS: Card[] = flatArray(allCsvCards)
-const csvIds = new Set(CSV_CARDS.map(c => c.id))
-
-const LEGACY_CARDS: Card[] = [
-  ...flatArray(allNewFireCards),
-  ...flatArray(blueElementalCards),
-  ...flatArray(blueElementalSpells),
-  ...flatArray(blueElementalFieldCards),
-  ...flatArray(redElementalCards),
-  ...flatArray(allNeutralCards),
-  ...flatArray(allNonElementalCards),
-  ...flatArray(advancedSpellCards),
-  ...flatArray(conditionalDamageCards),
-].filter(c => !csvIds.has(c.id))
-
-const ALL_CARDS: Card[] = [...CSV_CARDS, ...LEGACY_CARDS]
+// Single source of truth: CSV-generated cards.
+// Legacy hand-written card files (fire.ts, water.ts, ...) are NOT aggregated:
+// their ids never matched the CSV ids, so the old "fallback for ids not in CSV"
+// filter let every legacy card leak through with stale card numbers, producing
+// duplicate card_numbers with conflicting rarities in the DB catalog.
+const ALL_CARDS: Card[] = flatArray(allCsvCards)
 
 // Deduplicate by id
 const uniqueCards: Card[] = Array.from(
