@@ -12,6 +12,6 @@ export type {
   SkillCheckState, SkillCheckPlayerState, GamePlayerState,
 } from './card'
 
-export type { Counter, Player, GameState, GamePhaseType, GameEffect, EffectCondition, BattleResult } from './game'
+export type { Counter, Player, GameState, GamePhaseType, GameEffect, EffectCondition, BattleResult, PendingChoice, PendingChoiceType } from './game'
 
 export * from './ai'

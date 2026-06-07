@@ -39,6 +39,22 @@ export interface Player {
   equipmentActivations: Record<string, number>;
 }
 
+// Interactive mid-action choice (e.g. reveal_choose: pick 1 of the revealed
+// cards). While set, all other actions are rejected until resolveChoice runs.
+export type PendingChoiceType =
+  | 'reveal_choose'
+  | 'peek_place'
+  | 'peek_place_draw'
+  | 'draw_discard';
+
+export interface PendingChoice {
+  playerIndex: 0 | 1; // who must choose
+  type: PendingChoiceType;
+  cards: Card[]; // cards presented to the choosing player (private to them)
+  count: number; // how many must be chosen (0 = acknowledge only)
+  sourceCardName: string; // card that triggered the choice (for UI title)
+}
+
 export type GamePhaseType =
   | 'setup'
   | 'refresh'
@@ -60,6 +76,7 @@ export interface GameState {
   lastAction: string;
   battleLog: string[];
   effectStack: GameEffect[];
+  pendingChoice?: PendingChoice | null;
 }
 
 export interface GameEffect {
