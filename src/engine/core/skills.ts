@@ -1,5 +1,6 @@
 import type { AvatarCard, Skill, SkillCheckState, SkillCheckPlayerState } from '../../types/card'
 import type { GameState, Player } from '../../types/game'
+import { getSkills } from '../getSkills'
 import { updatePlayer } from './internals'
 import { drawCard } from './cardOps'
 import { hasEnoughSpektra, consumeSpektra } from './spektra'
@@ -17,8 +18,7 @@ export function executeSkill(
   if (!avatar || avatar.isTapped) return state
 
   // Get the skill
-  const skills = avatar.skills ?? [avatar.skill1, avatar.skill2].filter(Boolean)
-  const skill = skills[skillIndex] as Skill | undefined
+  const skill = getSkills(avatar)[skillIndex] as Skill | undefined
   if (!skill) return state
 
   // Check spektra cost

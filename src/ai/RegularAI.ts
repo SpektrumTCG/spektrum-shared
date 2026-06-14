@@ -2,6 +2,7 @@ import type { GameState } from '../types/game'
 import type { AIDecision } from '../types/ai'
 import type { AvatarCard } from '../types/card'
 import { BaseAI } from './BaseAI'
+import { getSkills } from '../engine'
 
 export class RegularAI extends BaseAI {
   decide(state: GameState, playerIndex: 0 | 1 = 1): AIDecision {
@@ -38,11 +39,10 @@ export class RegularAI extends BaseAI {
 
     // Priority 3: Use best affordable skill
     if (player.activeAvatar && !player.activeAvatar.isTapped) {
-      const skills = player.activeAvatar.skills ??
-        [player.activeAvatar.skill1, player.activeAvatar.skill2].filter(Boolean)
+      const skills = getSkills(player.activeAvatar)
 
       const affordableIdx = skills.findIndex(
-        s => s && this.canAffordSpektra(s.spektraCost, player.spektraPile)
+        s => this.canAffordSpektra(s.spektraCost, player.spektraPile)
       )
       if (affordableIdx >= 0) {
         const myDamage = player.activeAvatar.counters?.damage ?? 0

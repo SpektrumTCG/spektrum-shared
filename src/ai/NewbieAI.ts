@@ -2,6 +2,7 @@ import type { GameState } from '../types/game'
 import type { AIDecision } from '../types/ai'
 import type { AvatarCard } from '../types/card'
 import { BaseAI } from './BaseAI'
+import { getSkills } from '../engine'
 
 export class NewbieAI extends BaseAI {
   decide(state: GameState, playerIndex: 0 | 1 = 1): AIDecision {
@@ -33,9 +34,9 @@ export class NewbieAI extends BaseAI {
     // Use random affordable skill
     const avatar = player.activeAvatar
     if (avatar && !avatar.isTapped) {
-      const skills = avatar.skills ?? [avatar.skill1, avatar.skill2].filter(Boolean)
+      const skills = getSkills(avatar)
       const affordableIdx = skills.findIndex(
-        (s): s is NonNullable<typeof s> => !!s && this.canAffordSpektra(s.spektraCost, player.spektraPile)
+        s => this.canAffordSpektra(s.spektraCost, player.spektraPile)
       )
       if (affordableIdx >= 0) {
         return { type: 'useSkill', skillIndex: affordableIdx as 0 | 1, reasoning: 'Use skill', priority: 60 }

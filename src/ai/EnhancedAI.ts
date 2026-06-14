@@ -2,6 +2,7 @@ import type { GameState } from '../types/game'
 import type { AIDecision } from '../types/ai'
 import type { AvatarCard, Skill } from '../types/card'
 import { BaseAI } from './BaseAI'
+import { getSkills } from '../engine'
 
 export class EnhancedAI extends BaseAI {
   decide(state: GameState, playerIndex: 0 | 1 = 1): AIDecision {
@@ -50,11 +51,10 @@ export class EnhancedAI extends BaseAI {
 
     // Evaluate skills
     if (player.activeAvatar && !player.activeAvatar.isTapped) {
-      const skills = player.activeAvatar.skills ??
-        [player.activeAvatar.skill1, player.activeAvatar.skill2].filter(Boolean)
+      const skills = getSkills(player.activeAvatar)
 
       skills.forEach((skill, idx) => {
-        if (!skill || !this.canAffordSpektra(skill.spektraCost, player.spektraPile)) return
+        if (!this.canAffordSpektra(skill.spektraCost, player.spektraPile)) return
         const score = this.scoreSkill(skill, player, opponent)
         candidates.push({
           type: 'useSkill', skillIndex: idx as 0 | 1,
