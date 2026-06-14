@@ -25,28 +25,34 @@ jobs:
   bump-client-submodule:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout spektrum-client (with submodules)
+      # NOTE: submodules:false on purpose. We are about to REPLACE the submodule
+      # pointer, so we must not try to fetch/checkout the current (possibly
+      # stale or orphaned) pinned commit — that would fail with "not our ref".
+      - name: Checkout spektrum-client (no submodules)
         uses: actions/checkout@v4
         with:
           repository: SpektrumTCG/spektrum-client
           token: ${{ secrets.CONSUMER_SYNC_TOKEN }}
-          submodules: true
+          submodules: false
           fetch-depth: 0
 
-      - name: Bump spektrum-shared submodule to the just-pushed commit
+      - name: Repoint spektrum-shared submodule to the just-pushed commit
         run: |
           set -euo pipefail
           NEW_SHA="${GITHUB_SHA}"
-          echo "Pinning client submodule to spektrum-shared@${NEW_SHA}"
-          git -C spektrum-shared fetch origin "${NEW_SHA}"
-          git -C spektrum-shared checkout "${NEW_SHA}"
-          if git diff --quiet -- spektrum-shared; then
-            echo "Client already pinned to ${NEW_SHA}; nothing to do."
+          CUR_SHA="$(git ls-tree HEAD spektrum-shared | awk '{print $3}')"
+          echo "client pin: ${CUR_SHA:-<none>} -> ${NEW_SHA}"
+          if [ "${CUR_SHA}" = "${NEW_SHA}" ]; then
+            echo "Already pinned; nothing to do."
             exit 0
           fi
+          # Set the gitlink (mode 160000) directly to NEW_SHA without fetching
+          # the old commit. NEW_SHA is the commit that triggered this run, so it
+          # exists on spektrum-shared origin and the client's later submodule
+          # update (Vercel) can fetch it.
+          git update-index --add --cacheinfo 160000,"${NEW_SHA}",spektrum-shared
           git config user.name  "spektrum-sync[bot]"
           git config user.email "spektrum-sync@users.noreply.github.com"
-          git add spektrum-shared
           git commit -m "chore(shared): bump spektrum-shared to ${NEW_SHA:0:12}"
           git push
 
