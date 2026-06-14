@@ -1,10 +1,10 @@
 export * from "./cardRegistry";
-export * from "./cards/advanced";
-export * from "./cards/conditional";
-export * from "./cards/fire";
 export * from "./cards/generated";
-export * from "./cards/neutral";
-export * from "./cards/nonElemental";
+// Legacy hand-written card data still consumed by spektrum-client:
+//   fire.ts    -> newFireAvatarCards/newFireSpellCards (interactive tutorial)
+//   premade.ts -> fetchPremadeDecks/resolvePremadeDeckCards (shop premade decks)
+// These are NOT part of the CSV-generated catalog (cardRegistry). The other
+// legacy files (water/red/neutral/advanced/conditional/nonElemental) were dead
+// and removed.
+export * from "./cards/fire";
 export * from "./cards/premade";
-export * from "./cards/red";
-export * from "./cards/water";
