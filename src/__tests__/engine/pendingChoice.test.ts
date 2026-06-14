@@ -1,4 +1,4 @@
-import { startGame, playSpell, resolveChoice, endPhase, playItem, executeSkill } from '../../engine/gameEngine'
+import { startGame, playSpell, resolveChoice, endPhase, playItem, executeSkill } from '../../engine'
 import { cardRegistry } from '../../data/cardRegistry'
 import type { ActionCard, AvatarCard, Card } from '../../types'
 import type { GameState } from '../../types/game'

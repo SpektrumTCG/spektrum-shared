@@ -3,7 +3,7 @@ export * from "./discardMechanicChecker";
 export * from "./effectConditionChecker";
 export * from "./effectTargetResolver";
 export * from "./fieldTriggerProcessor";
-export * from "./gameEngine";
+export * from "./core";
 export * from "./getValidEvolutionTargets";
 export * from "./modifierUtils";
 export * from "./passiveSkillUtils";

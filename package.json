@@ -19,9 +19,11 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "echo 'tests live with consumers' && exit 0"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }
