@@ -1,0 +1,67 @@
+name: Sync consumers
+
+# Single source of truth = this repo. On every push to main, propagate the new
+# commit to both consumers automatically:
+#   - spektrum-client: bump the `spektrum-shared` git submodule pointer + push.
+#     That commit triggers a Vercel redeploy of the frontend.
+#   - spektrum-server (home server): fire a deploy webhook so it pulls the new
+#     shared clone, reinstalls, and restarts the backend.
+#
+# Required repo secrets (Settings -> Secrets and variables -> Actions):
+#   CONSUMER_SYNC_TOKEN  GitHub PAT (or fine-grained token) with `contents:write`
+#                        on SpektrumTCG/spektrum-client. Used to push the bump.
+#   HOME_DEPLOY_HOOK     (optional) URL the home server listens on to redeploy
+#                        the backend. Omit to skip backend notification.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: sync-consumers
+  cancel-in-progress: false
+
+jobs:
+  bump-client-submodule:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout spektrum-client (with submodules)
+        uses: actions/checkout@v4
+        with:
+          repository: SpektrumTCG/spektrum-client
+          token: ${{ secrets.CONSUMER_SYNC_TOKEN }}
+          submodules: true
+          fetch-depth: 0
+
+      - name: Bump spektrum-shared submodule to the just-pushed commit
+        run: |
+          set -euo pipefail
+          NEW_SHA="${GITHUB_SHA}"
+          echo "Pinning client submodule to spektrum-shared@${NEW_SHA}"
+          git -C spektrum-shared fetch origin "${NEW_SHA}"
+          git -C spektrum-shared checkout "${NEW_SHA}"
+          if git diff --quiet -- spektrum-shared; then
+            echo "Client already pinned to ${NEW_SHA}; nothing to do."
+            exit 0
+          fi
+          git config user.name  "spektrum-sync[bot]"
+          git config user.email "spektrum-sync@users.noreply.github.com"
+          git add spektrum-shared
+          git commit -m "chore(shared): bump spektrum-shared to ${NEW_SHA:0:12}"
+          git push
+
+  notify-home-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger backend redeploy (home server)
+        env:
+          HOOK: ${{ secrets.HOME_DEPLOY_HOOK }}
+        run: |
+          set -euo pipefail
+          if [ -z "${HOOK}" ]; then
+            echo "HOME_DEPLOY_HOOK not set; skipping backend notification."
+            exit 0
+          fi
+          curl -fsS -X POST "${HOOK}" \
+            -H "Content-Type: application/json" \
+            -d "{\"repo\":\"spektrum-shared\",\"sha\":\"${GITHUB_SHA}\"}"

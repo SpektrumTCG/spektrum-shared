@@ -1,5 +1,5 @@
 import { AIFactory } from '../../ai'
-import { startGame } from '../../engine/gameEngine'
+import { startGame } from '../../engine'
 import { cardRegistry } from '../../data/cardRegistry'
 import type { AvatarCard } from '../../types'
 

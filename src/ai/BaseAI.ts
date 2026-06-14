@@ -1,5 +1,7 @@
 import type { AIDifficulty, AIDecision, AIPersonality } from '../types/ai'
-import type { GameState } from '../types/game'
+import type { GameState, Player } from '../types/game'
+import type { ElementType } from '../types/card'
+import { hasEnoughSpektra } from '../engine'
 
 export const AI_PERSONALITIES: Record<AIDifficulty, AIPersonality> = {
   newbie: {
@@ -48,42 +50,8 @@ export abstract class BaseAI {
   }
 
   protected canAffordSpektra(cost: string[] | undefined, spektraPile: Array<{ element?: string }>): boolean {
-    if (!cost || cost.length === 0) return true
-    if (spektraPile.length < cost.length) return false
-
-    // Count available elements
-    const available: Record<string, number> = {}
-    let neutralAvailable = 0
-    for (const card of spektraPile) {
-      const el = card.element ?? 'neutral'
-      if (el === 'neutral') neutralAvailable++
-      else available[el] = (available[el] ?? 0) + 1
-    }
-
-    // Check specific costs; shortfall covered by neutral cards
-    let neutralRemaining = neutralAvailable
-    let neutralNeeded = 0
-    for (const el of cost) {
-      if (el === 'neutral') { neutralNeeded++; continue }
-      if ((available[el] ?? 0) > 0) {
-        available[el]!--
-      } else if (neutralRemaining > 0) {
-        neutralRemaining--
-      } else {
-        return false
-      }
-    }
-
-    // Neutral costs are wildcards — any leftover card pays
-    const leftoverSpecific = Object.values(available).reduce((s, v) => s + v, 0)
-    return (leftoverSpecific + neutralRemaining) >= neutralNeeded
-  }
-
-  protected hasAffordableSkill(state: GameState, playerIndex: 0 | 1): boolean {
-    const player = state.players[playerIndex]
-    const avatar = player.activeAvatar
-    if (!avatar || avatar.isTapped) return false
-    const skills = avatar.skills ?? [avatar.skill1, avatar.skill2].filter(Boolean)
-    return skills.some(s => s && this.canAffordSpektra(s.spektraCost, player.spektraPile))
+    // Delegate to the engine's authoritative rule so AI affordability never
+    // drifts from what playSpell / executeSkill will actually accept.
+    return hasEnoughSpektra({ spektraPile } as unknown as Player, (cost ?? []) as ElementType[])
   }
 }

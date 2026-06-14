@@ -1,4 +1,4 @@
-import { startGame, drawCard, addToSpektra, playAvatar, endPhase, checkWinner } from '../../engine/gameEngine'
+import { startGame, drawCard, addToSpektra, playAvatar, endPhase, checkWinner } from '../../engine'
 import { cardRegistry } from '../../data/cardRegistry'
 import { AvatarCard } from '../../types'
 
